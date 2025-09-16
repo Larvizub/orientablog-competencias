@@ -20,8 +20,8 @@ export interface AuthContextType {
   currentUser: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, nombre: string, apellido: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<unknown>;
+  register: (email: string, password: string, nombre: string, apellido: string) => Promise<unknown>;
   logout: () => Promise<void>;
 }
 

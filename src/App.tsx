@@ -5,6 +5,7 @@ import { AuthPage } from '@/pages/AuthPage';
 import { Dashboard } from '@/pages/Dashboard';
 import { Blog } from '@/pages/Blog';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { Layout } from '@/components/layout/Layout';
 
 function App() {
   return (
@@ -14,23 +15,26 @@ function App() {
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
 
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute adminOnly>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
+            {/* Layout wraps protected routes and shows Navbar + Sidebar */}
+            <Route element={<Layout />}> 
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/blog"
-              element={
-                <ProtectedRoute>
-                  <Blog />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/blog"
+                element={
+                  <ProtectedRoute>
+                    <Blog />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
             <Route path="/" element={<Navigate to="/auth" replace />} />
             <Route path="*" element={<Navigate to="/auth" replace />} />

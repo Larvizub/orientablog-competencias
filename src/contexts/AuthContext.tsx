@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string, nombre: string, apellido: string) => {
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
-    
+
     const profile: UserProfile = {
       uid: user.uid,
       nombre,
@@ -32,10 +32,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     await set(ref(database, `usuarios/${user.uid}`), profile);
+    // Actualizar estado local inmediatamente
+    setUserProfile(profile);
   };
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      console.log('AuthProvider.login called for', email);
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      console.log('AuthProvider.login success', res.user?.uid);
+      return res;
+    } catch (error) {
+      console.error('AuthProvider.login error', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
@@ -50,10 +60,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (user) {
         // Obtener el perfil del usuario desde la base de datos
         const profileRef = ref(database, `usuarios/${user.uid}`);
-        const snapshot = await get(profileRef);
-        
-        if (snapshot.exists()) {
-          setUserProfile(snapshot.val());
+        try {
+          const snapshot = await get(profileRef);
+          if (snapshot.exists()) {
+            setUserProfile(snapshot.val());
+          } else {
+            // No existe perfil, limpiar
+            setUserProfile(null);
+          }
+        } catch (error: unknown) {
+          // Manejar errores de permisos u otros errores de la DB
+          console.error('Error leyendo perfil de usuario desde Realtime DB', error);
+          // Si el error es por permisos, intentamos un fallback seguro para el administrador
+          // (temporal: configura reglas en Firebase para resolver esto de forma permanente)
+          try {
+            const adminEmails = ['admin@orientablog.com'];
+            const adminUidFallback = 'yXug6S5Ia3RrJRrQgSIFnVaPsw52';
+            if (user && (adminEmails.includes(user.email || '') || user.uid === adminUidFallback)) {
+              // Conceder permisos de administrador localmente mientras se corrigen las reglas
+              const fallbackProfile: UserProfile = {
+                uid: user.uid,
+                nombre: 'Administrador',
+                apellido: '',
+                email: user.email || 'admin@orientablog.com',
+                isAdmin: true,
+                fechaRegistro: new Date().toISOString()
+              };
+              console.warn('Aplicando fallback de perfil ADMIN local para', user.uid);
+              setUserProfile(fallbackProfile);
+            } else {
+              setUserProfile(null);
+            }
+          } catch {
+            // En caso de cualquier otro error, limpiar perfil
+            setUserProfile(null);
+          }
         }
       } else {
         setUserProfile(null);

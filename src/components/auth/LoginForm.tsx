@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const [error, setError] = useState('');
   
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +26,17 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       setError('');
       setLoading(true);
       await login(email, password);
+      // Redirigir tras inicio de sesión exitoso
+      const adminEmail = 'admin@orientablog.com';
+      if (email === adminEmail) {
+        navigate('/dashboard');
+      } else {
+        navigate('/blog');
+      }
     } catch {
       setError('Error al iniciar sesión. Verifica tus credenciales.');
+      // Additional debug info is logged in the AuthProvider; also log here
+      console.error('Login failed for', email);
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,12 @@
+/* stylelint-disable */
+/*
+  This file uses Tailwind's directives (@tailwind, @apply) and CSS
+  custom properties. Some linters that don't run PostCSS will flag
+  these at-rules as unknown. We disable stylelint for this file so
+  that CI/local editors which don't process Tailwind won't show
+  spurious warnings. Tailwind/PostCSS will still process the file
+  during the build.
+*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -48,6 +57,8 @@
     --ring: 224.3 76.3% 94.1%;
   }
 }
+
+/* stylelint-enable */
 
 @layer base {
   * {

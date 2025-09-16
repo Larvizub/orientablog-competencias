@@ -79,10 +79,10 @@ export function CrearPublicacion() {
         setCategorias([]);
         return;
       }
-      const lista = Object.values(val).map((c) => c.nombre);
-      setCategorias(lista);
-      // if current category no longer exists, pick the first available
-      setCategoria((current) => (lista.length && !lista.includes(current) ? lista[0] : current));
+  const lista = Object.values(val).map((c) => c.nombre);
+  setCategorias(lista);
+  // si la categoría actual deja de existir, seleccionar la primera disponible
+  setCategoria((current) => (lista.length && !lista.includes(current) ? lista[0] : current));
     };
 
     onValue(categoriasRef, listener);

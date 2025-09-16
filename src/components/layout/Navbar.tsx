@@ -10,7 +10,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { BookOpen, User, LogOut, Sun, Moon } from 'lucide-react';
 
-export function Navbar() {
+type NavbarProps = {
+  onToggleSidebar?: () => void;
+};
+
+export function Navbar({ onToggleSidebar }: NavbarProps) {
 
   const { userProfile, logout } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -29,11 +33,22 @@ export function Navbar() {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link to="/dashboard" className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6" />
-            <span className="font-bold text-xl">OrientaBlog</span>
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* Mobile toggle (left of logo) */}
+            <div className="md:hidden">
+              <Button variant="ghost" size="sm" onClick={() => onToggleSidebar?.()} aria-label="Abrir menú">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </Button>
+            </div>
+
+            {/* Logo */}
+            <Link to="/dashboard" className="flex items-center space-x-2">
+              <BookOpen className="h-6 w-6" />
+              <span className="font-bold text-xl">OrientaBlog</span>
+            </Link>
+          </div>
 
           {/* Navigation Links removed from top bar; use sidebar for navigation */}
 

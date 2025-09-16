@@ -10,7 +10,7 @@ import type { UserProfile } from '@/contexts/auth-context';
 
 export function Usuarios() {
   const { userProfile } = useAuth();
-  type UserWithCount = UserProfile & { publicacionesCount?: number };
+  type UserWithCount = UserProfile & { publicacionesCount?: number; isOrientador?: boolean };
   const [usuarios, setUsuarios] = useState<UserWithCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -114,6 +114,43 @@ export function Usuarios() {
     }
   };
 
+  const toggleOrientadorStatus = async (usuario: UserWithCount) => {
+    if (!userProfile?.isAdmin) {
+      setError('No tienes permisos para cambiar roles de usuario');
+      return;
+    }
+
+    if (usuario.uid === userProfile.uid) {
+      setError('No puedes cambiar tus propios permisos');
+      return;
+    }
+
+    try {
+      setUpdating(usuario.uid);
+      setError('');
+
+      const nuevoIsOrientador = !usuario.isOrientador;
+      const usuarioRef = ref(database, `usuarios/${usuario.uid}`);
+      await set(usuarioRef, {
+        ...usuario,
+        isOrientador: nuevoIsOrientador
+      });
+
+      setUsuarios(prev => 
+        prev.map(u => 
+          u.uid === usuario.uid 
+            ? { ...u, isOrientador: nuevoIsOrientador }
+            : u
+        )
+      );
+    } catch (err) {
+      console.error('Usuarios: Error actualizando orientador:', err);
+      setError('Error al actualizar el rol de orientador');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const deleteUser = async (usuario: UserWithCount) => {
@@ -209,6 +246,7 @@ export function Usuarios() {
                 <th className="px-4 py-2 text-left text-sm font-semibold">Fecha registro</th>
                 <th className="px-4 py-2 text-left text-sm font-semibold">Publicaciones</th>
                 <th className="px-4 py-2 text-left text-sm font-semibold">Admin</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold">Orientador</th>
                 <th className="px-4 py-2 text-left text-sm font-semibold">Acciones</th>
               </tr>
             </thead>
@@ -243,6 +281,25 @@ export function Usuarios() {
                     )}
                     {updating === usuario.uid && (
                       <p className="text-sm text-muted-foreground mt-2">Actualizando permisos...</p>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm whitespace-nowrap">
+                    {usuario.uid === userProfile?.uid ? (
+                      <Badge variant="outline">Tú</Badge>
+                    ) : (
+                      <div className="flex items-center">
+                        {usuario.isOrientador && <Badge variant="default" className="mr-2">Orientador</Badge>}
+                        {userProfile?.isAdmin ? (
+                          <Switch
+                            id={`orientador-${usuario.uid}`}
+                            checked={Boolean(usuario.isOrientador)}
+                            onCheckedChange={() => toggleOrientadorStatus(usuario)}
+                            disabled={updating === usuario.uid}
+                          />
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm min-w-[140px] whitespace-nowrap">

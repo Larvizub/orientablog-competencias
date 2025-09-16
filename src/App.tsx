@@ -7,6 +7,7 @@ import { Blog } from '@/pages/Blog';
 import CrearPublicacion from '@/pages/CrearPublicacion';
 import Usuarios from '@/pages/Usuarios';
 import Categorias from '@/pages/Categorias';
+import Citas from '@/pages/Citas';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Layout } from '@/components/layout/Layout';
 
@@ -37,6 +38,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/crear-publicacion"
                 element={
@@ -45,6 +47,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/citas"
+                element={
+                  <ProtectedRoute>
+                    <Citas />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="/usuarios"
                 element={
@@ -53,6 +65,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/categorias"
                 element={

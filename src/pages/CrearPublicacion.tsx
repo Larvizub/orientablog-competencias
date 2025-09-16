@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/contexts/useAuth';
 import { ref, push, onValue, off, DataSnapshot } from 'firebase/database';
 import { database } from '@/lib/firebase';
@@ -36,6 +36,7 @@ export function CrearPublicacion() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const categoryRootRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,16 +105,14 @@ export function CrearPublicacion() {
           <div>
             <Label htmlFor="categoria">Categoría</Label>
             {categorias.length > 0 ? (
-              <select
-                id="categoria"
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                {categorias.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              // Custom dropdown to avoid native select positioning issues on mobile
+              <div className="relative" ref={categoryRootRef}>
+                <CategoryDropdown
+                  options={categorias}
+                  value={categoria}
+                  onChange={(v: string) => setCategoria(v)}
+                />
+              </div>
             ) : (
               <Input id="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} />
             )}
@@ -142,3 +141,53 @@ export function CrearPublicacion() {
 }
 
 export default CrearPublicacion;
+
+// Local simple dropdown component
+function CategoryDropdown({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!buttonRef.current || !listRef.current) return;
+      const target = e.target as Node;
+      if (!buttonRef.current.contains(target) && !listRef.current.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
+  }, []);
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        ref={buttonRef}
+        onClick={() => setOpen(v => !v)}
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-left text-sm flex items-center justify-between"
+      >
+        <span>{value}</span>
+        <span className="ml-2 text-xs">▾</span>
+      </button>
+
+      {open && (
+        <div ref={listRef} className="absolute z-50 mt-1 w-full rounded-md bg-popover shadow-lg">
+          <div className="max-h-56 overflow-auto">
+            {options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => { onChange(opt); setOpen(false); }}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-muted/80 ${opt === value ? 'bg-primary text-primary-foreground' : ''}`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

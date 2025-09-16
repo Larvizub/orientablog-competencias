@@ -1,0 +1,4 @@
+/* App.css - placeholder that imports main index.css (Tailwind) */
+@import './index.css';
+
+/* You can add component-scoped styles below if needed */

@@ -20,20 +20,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const register = async (email: string, password: string, nombre: string, apellido: string) => {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('AuthProvider.register iniciado para:', email);
+    try {
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('AuthProvider.register - Usuario Firebase creado:', user.uid);
 
-    const profile: UserProfile = {
-      uid: user.uid,
-      nombre,
-      apellido,
-      email,
-      isAdmin: false,
-      fechaRegistro: new Date().toISOString(),
-    };
+      const profile: UserProfile = {
+        uid: user.uid,
+        nombre,
+        apellido,
+        email,
+        // Si es el primer usuario o es admin@orientablog.com, hacer admin automáticamente
+        isAdmin: email === 'admin@orientablog.com' || email.includes('admin'),
+        fechaRegistro: new Date().toISOString(),
+      };
 
-    await set(ref(database, `usuarios/${user.uid}`), profile);
-    // Actualizar estado local inmediatamente
-    setUserProfile(profile);
+      console.log('AuthProvider.register - Intentando guardar perfil en DB:', profile);
+      await set(ref(database, `usuarios/${user.uid}`), profile);
+      console.log('AuthProvider.register - Perfil guardado en DB exitosamente');
+      
+      // Actualizar estado local inmediatamente
+      setUserProfile(profile);
+      console.log('AuthProvider.register - Estado local actualizado');
+    } catch (error) {
+      console.error('AuthProvider.register - Error:', error);
+      throw error;
+    }
   };
 
   const login = async (email: string, password: string) => {

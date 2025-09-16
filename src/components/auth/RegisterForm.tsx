@@ -31,27 +31,50 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('RegisterForm: handleSubmit iniciado', formData);
     
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
+      console.log('RegisterForm: Error - contraseñas no coinciden');
       return;
     }
 
     if (formData.password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
+      console.log('RegisterForm: Error - contraseña muy corta');
       return;
     }
 
     try {
       setError('');
       setLoading(true);
+      console.log('RegisterForm: Llamando a register()');
       await register(formData.email, formData.password, formData.nombre, formData.apellido);
+      console.log('RegisterForm: register() completado exitosamente');
     } catch (error) {
-      // Normalizar error a string cuando sea posible
-      const msg = error instanceof Error ? error.message : 'Error al crear la cuenta. Intenta de nuevo.';
+      console.error('RegisterForm: Error en register():', error);
+      
+      // Manejar errores específicos de Firebase
+      let msg = 'Error al crear la cuenta. Intenta de nuevo.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('auth/email-already-in-use')) {
+          msg = 'Este email ya está registrado. ¿Quieres iniciar sesión en su lugar?';
+        } else if (error.message.includes('auth/weak-password')) {
+          msg = 'La contraseña es muy débil. Debe tener al menos 6 caracteres.';
+        } else if (error.message.includes('auth/invalid-email')) {
+          msg = 'El formato del email no es válido.';
+        } else if (error.message.includes('auth/operation-not-allowed')) {
+          msg = 'El registro con email/contraseña no está habilitado.';
+        } else {
+          msg = error.message;
+        }
+      }
+      
       setError(msg);
     } finally {
       setLoading(false);
+      console.log('RegisterForm: handleSubmit terminado, loading=false');
     }
   };
 

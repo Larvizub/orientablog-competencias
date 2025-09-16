@@ -3,6 +3,7 @@ applyTo: '**'
 ---
 # OrientaBlog Instructions
 - Utiliza unicamente pnpm como gestor de paquetes.
+- No utilices más de un puerto de localhost, usa siempre el 5173.
 - Utiliza Vite con el framework de React con TypeScript.
 - Utiliza unicamente Shadcn UI para los componentes de la interfaz de usuario.
 - La interfaz debe tener modo claro y oscuro y debe adaptarse al sistema del usuario.

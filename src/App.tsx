@@ -4,6 +4,9 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AuthPage } from '@/pages/AuthPage';
 import { Dashboard } from '@/pages/Dashboard';
 import { Blog } from '@/pages/Blog';
+import CrearPublicacion from '@/pages/CrearPublicacion';
+import Usuarios from '@/pages/Usuarios';
+import Categorias from '@/pages/Categorias';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Layout } from '@/components/layout/Layout';
 
@@ -31,6 +34,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Blog />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/crear-publicacion"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <CrearPublicacion />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/usuarios"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <Usuarios />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/categorias"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <Categorias />
                   </ProtectedRoute>
                 }
               />
